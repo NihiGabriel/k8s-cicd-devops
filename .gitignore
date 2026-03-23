@@ -1,2 +1,23 @@
+# Dependencies
 node_modules/
+
+# Downloaded binaries (install these system-wide, never commit them)
+minikube
 minikube-linux-amd64
+kubectl
+kubectl-linux-amd64
+*.bin
+
+# Logs
+logs/
+*.log
+nohup.out
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*
+
+# OS clutter
+.DS_Store
+Thumbs.db
