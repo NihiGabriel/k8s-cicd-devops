@@ -1,13 +1,21 @@
 {
-  "name": "k8s-cicd-demo",
+  "name": "k8s-cicd-devops",
   "version": "1.0.0",
-  "description": "A Kubernetes + CI/CD app",
+  "description": "A mini Kubernetes + CI/CD app",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo 'Tests passed!' && exit 0"
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "verbose": true
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0"
   }
 }
