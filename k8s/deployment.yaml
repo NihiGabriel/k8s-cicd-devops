@@ -5,7 +5,7 @@ metadata:
   labels:
     app: k8s-cicd-devops
 spec:
-  replicas: 2                       
+  replicas: 2
   selector:
     matchLabels:
       app: k8s-cicd-devops
@@ -16,12 +16,15 @@ spec:
     spec:
       containers:
         - name: k8s-cicd-devops
-          image: gabrielnihi/k8s-cicd-devops:latest
+          image: gabrielnihi/k8s-cicd-devops:v2
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
-          env:
-            - name: APP_VERSION
-              value: "1.0.0"
+          envFrom:
+            - configMapRef:
+                name: k8s-cicd-devops-config
+            - secretRef:
+                name: k8s-cicd-devops-secret
           resources:
             requests:
               memory: "64Mi"
@@ -29,13 +32,13 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "200m"
-          livenessProbe:           # K8s will restart if this fails
+          livenessProbe:
             httpGet:
               path: /health
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 15
-          readinessProbe:          # K8s won't send traffic until this passes
+          readinessProbe:
             httpGet:
               path: /health
               port: 3000

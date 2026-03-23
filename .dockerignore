@@ -1,5 +1,10 @@
 node_modules
 .git
 .github
+k8s
+logs
+tests
 *.md
 .dockerignore
+nohup.out
+minikube-linux-amd64

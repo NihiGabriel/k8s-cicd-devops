@@ -22,3 +22,4 @@ file.txt
 # OS clutter
 .DS_Store
 Thumbs.db
+k8s/secret.yaml
