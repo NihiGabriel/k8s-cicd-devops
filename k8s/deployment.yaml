@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-cicd-devops
+  labels:
+    app: k8s-cicd-devops
+spec:
+  replicas: 2                       
+  selector:
+    matchLabels:
+      app: k8s-cicd-devops
+  template:
+    metadata:
+      labels:
+        app: k8s-cicd-devops
+    spec:
+      containers:
+        - name: k8s-cicd-devops
+          image: gabrielnihi/k8s-cicd-devops:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_VERSION
+              value: "1.0.0"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:           # K8s will restart if this fails
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:          # K8s won't send traffic until this passes
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
