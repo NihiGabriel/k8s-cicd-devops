@@ -2,15 +2,22 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../app');
 
+const TEST_MONGO_URI = 'mongodb://localhost:27017/k8s-cicd-devops-test';
+
 beforeAll(async () => {
-  await mongoose.connect(
-    process.env.MONGO_URI || 'mongodb://localhost:27017/k8s-cicd-devops-test'
-  );
+  await mongoose.connect(TEST_MONGO_URI);
 });
 
 afterAll(async () => {
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
+});
+
+afterEach(async () => {
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    await collections[key].deleteMany({});
+  }
 });
 
 describe('GET /', () => {
@@ -55,6 +62,7 @@ describe('Todo API', () => {
   });
 
   it('GET /todos — returns list of todos', async () => {
+    await request(app).post('/todos').send({ title: 'Test todo' });
     const res = await request(app).get('/todos');
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -63,8 +71,12 @@ describe('Todo API', () => {
   });
 
   it('PUT /todos/:id — updates a todo', async () => {
+    const created = await request(app)
+      .post('/todos')
+      .send({ title: 'To update' });
+    const id = created.body.data._id;
     const res = await request(app)
-      .put(`/todos/${todoId}`)
+      .put(`/todos/${id}`)
       .send({ completed: true });
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -72,15 +84,18 @@ describe('Todo API', () => {
   });
 
   it('DELETE /todos/:id — deletes a todo', async () => {
-    const res = await request(app)
-      .delete(`/todos/${todoId}`);
+    const created = await request(app)
+      .post('/todos')
+      .send({ title: 'To delete' });
+    const id = created.body.data._id;
+    const res = await request(app).delete(`/todos/${id}`);
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
   });
 
-  it('GET /todos/:id — returns 404 for missing todo', async () => {
+  it('PUT /todos/:id — returns 404 for missing todo', async () => {
     const res = await request(app)
-      .put(`/todos/000000000000000000000000`)
+      .put('/todos/000000000000000000000000')
       .send({ completed: true });
     expect(res.statusCode).toBe(404);
   });

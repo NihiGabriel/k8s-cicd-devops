@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+  labels:
+    app: k8s-cicd-devops
+spec:
+  accessModes:
+    - ReadWriteOnce         # one node can read/write at a time
+  resources:
+    requests:
+      storage: 1Gi          # 1 gigabyte of storage

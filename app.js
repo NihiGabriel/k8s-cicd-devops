@@ -5,20 +5,6 @@ const Todo = require('./models/Todo');
 const app = express();
 app.use(express.json());
 
-// ── Database connection ────────────────────────
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/k8s-cicd-devops';
-
-let dbConnected = false;
-
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    dbConnected = true;
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err.message);
-  });
-
 // ── Existing routes ────────────────────────────
 app.get('/', (req, res) => {
   res.json({
@@ -31,11 +17,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
+  const dbState = mongoose.connection.readyState;
   res.json({
     status: 'healthy',
     uptime: process.uptime(),
     environment: process.env.APP_ENV || 'development',
-    database: dbConnected ? 'connected' : 'disconnected'
+    database: dbState === 1 ? 'connected' : 'disconnected'
   });
 });
 
@@ -50,8 +37,6 @@ app.get('/info', (req, res) => {
 });
 
 // ── Todo routes ────────────────────────────────
-
-// GET /todos — list all todos
 app.get('/todos', async (req, res) => {
   try {
     const todos = await Todo.find().sort({ createdAt: -1 });
@@ -61,7 +46,6 @@ app.get('/todos', async (req, res) => {
   }
 });
 
-// POST /todos — create a todo
 app.post('/todos', async (req, res) => {
   try {
     const todo = await Todo.create({ title: req.body.title });
@@ -71,7 +55,6 @@ app.post('/todos', async (req, res) => {
   }
 });
 
-// PUT /todos/:id — update a todo
 app.put('/todos/:id', async (req, res) => {
   try {
     const todo = await Todo.findByIdAndUpdate(
@@ -86,7 +69,6 @@ app.put('/todos/:id', async (req, res) => {
   }
 });
 
-// DELETE /todos/:id — delete a todo
 app.delete('/todos/:id', async (req, res) => {
   try {
     const todo = await Todo.findByIdAndDelete(req.params.id);
